@@ -25,16 +25,13 @@ func jsonKeyOrder(body string) []string {
 	}
 	var keys []string
 	for dec.More() {
-		// The next token at the top level is the key.
+		// Inside an object, dec.More() true guarantees the next token is a string
+		// key (the decoder validates the grammar), so a type assertion is safe.
 		kt, err := dec.Token()
 		if err != nil {
 			return keys
 		}
-		key, ok := kt.(string)
-		if !ok {
-			return keys
-		}
-		keys = append(keys, key)
+		keys = append(keys, kt.(string))
 		// Consume the value: a scalar is one token; a nested object/array is a
 		// delimiter whose matching close we skip to by tracking depth.
 		if err := skipValue(dec); err != nil {
